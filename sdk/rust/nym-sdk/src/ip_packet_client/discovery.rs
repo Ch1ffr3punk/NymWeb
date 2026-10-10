@@ -1,0 +1,128 @@
+// Copyright 2025 - Nym Technologies SA <contact@nymtech.net>
+// SPDX-License-Identifier: Apache-2.0
+
+//! IPR gateway discovery — find and rank IPR-enabled exit gateways via the Nym API.
+
+use std::collections::HashMap;
+
+use nym_crypto::asymmetric::ed25519;
+use nym_ip_packet_requests::v9;
+use nym_sphinx::addressing::clients::Recipient;
+use nym_validator_client::nym_api::NymApiClientExt;
+use tracing::{debug, info};
+
+use rand::seq::IndexedRandom;
+
+use crate::Error;
+
+#[derive(Clone)]
+pub struct IprWithPerformance {
+    pub address: Recipient,
+    pub identity: ed25519::PublicKey,
+    pub performance: u8,
+    /// The node's release version, used to pick the IPR protocol version up front.
+    pub version: semver::Version,
+}
+
+pub async fn retrieve_exit_nodes_with_performance(
+    client: nym_http_api_client::Client,
+) -> Result<Vec<IprWithPerformance>, Error> {
+    let all_nodes = client
+        .get_all_described_nodes_v2()
+        .await?
+        .into_iter()
+        .map(|described| (described.ed25519_identity_key(), described))
+        .collect::<HashMap<_, _>>();
+
+    let exit_gateways = client
+        .get_all_basic_exit_assigned_nodes_with_metadata()
+        .await?
+        .nodes;
+
+    let mut described = Vec::new();
+
+    for exit in exit_gateways {
+        // Keep only nodes declaring the exit-IPR role (an exit gateway can be
+        // network-requester-only); others don't serve an IPR, so a v9 connect to
+        // them just times out.
+        //
+        // TODO(ipr-perf): rewrite this selection when IPR performance monitoring
+        // lands — rank on measured IPR health, since directory `performance`
+        // doesn't predict IPR usability.
+        if !exit.supported_roles.exit_ipr {
+            continue;
+        }
+
+        let Some(node) = all_nodes.get(&exit.ed25519_identity_pubkey) else {
+            continue;
+        };
+
+        // Only select nodes running a version that supports v9 (LP Stream framing)
+        let Ok(node_version) = semver::Version::parse(node.version()) else {
+            debug!(
+                "Skipping node {}: unable to parse version '{}'",
+                exit.ed25519_identity_pubkey,
+                node.version()
+            );
+            continue;
+        };
+        if node_version < v9::MIN_RELEASE_VERSION {
+            debug!(
+                "Skipping node {}: version {} < minimum {}",
+                exit.ed25519_identity_pubkey,
+                node_version,
+                v9::MIN_RELEASE_VERSION
+            );
+            continue;
+        }
+
+        if let Some(ipr_info) = node.description.ip_packet_router.clone() {
+            if let Ok(parsed_address) = ipr_info.address.parse() {
+                described.push(IprWithPerformance {
+                    address: parsed_address,
+                    identity: exit.ed25519_identity_pubkey,
+                    performance: exit.performance.round_to_integer(),
+                    version: node_version,
+                })
+            }
+        }
+    }
+
+    Ok(described)
+}
+
+/// Select an IPR gateway from the directory, returning its address and the node's
+/// release version so the caller can pick the IPR protocol version up front.
+pub async fn get_best_ipr(
+    client: nym_http_api_client::Client,
+) -> Result<(Recipient, semver::Version), Error> {
+    let nodes = retrieve_exit_nodes_with_performance(client).await?;
+    info!("Found {} Exit Gateways", nodes.len());
+
+    let selected_ipr = nodes
+        .choose_weighted(&mut rand::rng(), |gw| gw.performance as f64)
+        .map_err(|_| Error::NoGatewayAvailable)?;
+
+    info!(
+        "Using IPR: {} (Gateway: {}, version: {})",
+        selected_ipr.address, selected_ipr.identity, selected_ipr.version
+    );
+
+    Ok((selected_ipr.address, selected_ipr.version.clone()))
+}
+
+/// Look up a node's release version by its identity (e.g. the gateway in an IPR
+/// address), so an explicit-address connect can pick the IPR protocol version
+/// from the directory too rather than probing.
+pub async fn lookup_node_version(
+    client: &nym_http_api_client::Client,
+    identity: ed25519::PublicKey,
+) -> Result<semver::Version, Error> {
+    let node = client
+        .get_all_described_nodes_v2()
+        .await?
+        .into_iter()
+        .find(|n| n.ed25519_identity_key() == identity)
+        .ok_or(Error::NoGatewayAvailable)?;
+    semver::Version::parse(node.version()).map_err(|_| Error::NoGatewayAvailable)
+}
