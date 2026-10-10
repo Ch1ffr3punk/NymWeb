@@ -1,1 +1,10 @@
 This repository if for peer review aimed at the Nym team and third-party Nym developers, to make a future WWW within the Nym Mixnet production ready, without modifying web browsers or web servers.
+
+Nym Mixnet Server Alice:
+
+http://976fc2fdad20aafa9c778390215691b358f52e4907c92e309933d38e4abd656152d7260d3ab08e19ee9a5b775ca546648d0f590e1b0d33d3022bba925904072d1fc394a4e26c4053b95ed6e00063c8b634917dc0fd5d2bb6a112f0ef6d65e968/
+
+Nym Mixnet Server Bob:
+
+http://31dde123ead24ad22c6d39ff27ce8a7d1d6be3aa45952f0dc096d6990e34471a0e121261c65817e99438707d612cb7b844da6e90c4a60b187d5f51129ff4e043cee0058da776f25be7505ac380acb6c5e876cc1452e083a792e4550604fb85d5/
+
