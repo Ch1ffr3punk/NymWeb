@@ -1,6 +1,6 @@
 This repository if for peer review aimed at the Nym team and third-party Nym developers, to make a future WWW within the Nym Mixnet production ready, without modifying web browsers or web servers.
 
-Download the nym repository and place the web_proxy folder in /sdk/rust/nym-sdk/ and replace the original Cargo.toml with this Cargo.toml.
+Download the [Nym repository](https://github.com/nymtech/nym) and place the web_proxy folder in /sdk/rust/nym-sdk/ and replace the original Cargo.toml with this Cargo.toml.
 
 Nym Mixnet Web Server Alice:
 
