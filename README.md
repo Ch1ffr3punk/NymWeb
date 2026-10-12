@@ -10,6 +10,4 @@ Nym Mixnet Web Server Bob:
 
 http://31dde123ead24ad22c6d39ff27ce8a7d1d6be3aa45952f0dc096d6990e34471a0e121261c65817e99438707d612cb7b844da6e90c4a60b187d5f51129ff4e0434f0b3ac9d47db13c71de11c359f9c4fb783883f336f126e9d1311b48f98205dd/
 
-To test the provided Nym Mixnet URLs with a web browser, simply download a binary of nym-web-proxy for Windows or Linux start it and set in your web browser settings http proxy port to 127.0.0.1:8081 and paste the URL in your web browser. To run your own web server in the Nym Mixnet let it listen on http port 8080 and start the official nym-proxy-server Linux binary and use nym-address-encoder for your http Nym Mixnet URL. That's all!
-
-
+To test the provided Nym Mixnet URLs with a web browser, simply download a binary of nym-web-proxy for your operating system, start it and set in your web browser settings http proxy port to 127.0.0.1:8081 and paste the URL in your web browser. To run your own web server in the Nym Mixnet let it listen on http port 8080 and start the official nym-proxy-server Linux binary and use nym-address-encoder for your http Nym Mixnet URL. That's all!
