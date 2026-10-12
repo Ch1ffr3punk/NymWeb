@@ -152,6 +152,7 @@ hyper-util = { version = "0.1", features = ["full", "client-legacy", "tokio"] }
 http-body-util = "0.1"
 bs58 = "0.5"
 hex = "0.4"
+brotli-decompressor = "6.0.1"
 
 # Feature: stream
 nym-lp-data = { workspace = true, optional = true }
@@ -190,6 +191,8 @@ nym-bin-common = { workspace = true, features = [
     "basic_tracing",
 ], optional = true }
 nym-sphinx-addressing = { workspace = true, optional = true }
+flate2.workspace = true
+brotli = "9.0.0"
 
 [dev-dependencies]
 anyhow = { workspace = true }
