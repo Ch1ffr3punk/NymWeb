@@ -1,0 +1,11 @@
+--- FILE HASHES (RIPEMD-160) ---
+Cargo.toml: cead9e5ed463a2fa26df2fd515e70997f12e40b2
+LICENSE: 304c26c26e8af4d60f1e0818baa73f8ac9b511fd
+Nginx\default: 05b97356a80254c537f5c7b4fa86530a8338127d
+Nginx\nginx.conf: 719923145a0dabe2edaf4c3c483ed3ee2b612cb2
+README.md: 955a721c5e79ed6ec83a1971216a60b07221880b
+web_proxy\bin\encoder.rs: cfa854cf04b936b66864840255f34d3c2e8fb798
+web_proxy\bin\web_proxy_client.rs: 38a3b9a8c0f3a0455c8bfff8574f33606613aa8b
+
+--- ROOT HASH (RIPEMD-160) ---
+d1eed6e0fd06f0c8287531e8c71c8643b7754c52
